@@ -35,7 +35,7 @@ def attributes(args_attributes, **kwargs):
         if arg_name == 'content':
             continue  # Special case: <element arg1="value1" ...>content</element>
         if arg_name in kwargs:
-            if arg_desc.startswith('(float)'):
+            if type(kwargs[arg_name]) != str and arg_desc.startswith('(float)'):
                 svg_code += f'{svg_arg_name}="{kwargs[arg_name]:.2f}" '
             else:
                 svg_code += f'{svg_arg_name}="{kwargs[arg_name]}" '
