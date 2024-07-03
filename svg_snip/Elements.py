@@ -6,14 +6,14 @@ Usage:
     from svg_snip.Composer import Composer
     from svg_snip.Elements import circle
     svg = Composer([200,200])
-    svg.add(circle, cx=100, cy=100)
+    svg.add(circle, cx=100, cy=100, r=5)
     print(svg.render())
     
 Usage (in Jupyterlab):
     from svg_snip.Composer import Composer
     from svg_snip.Elements import circle
     svg = Composer([200,200])
-    svg.add(circle, cx=100, cy=100)
+    svg.add(circle, cx=100, cy=100, r=5)
     svg.display()
 
 See also: CanvasWithOverlay in Jupyter.py
