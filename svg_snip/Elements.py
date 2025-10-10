@@ -1,4 +1,17 @@
-""" Generation of Scalable Vector Graphics in HTML snippets
+"""
+Module for programmatic generation of SVG (Scalable Vector Graphics) elements as strings.
+
+Basic SVG shapes:
+    - Predefined functions for common SVG elements such as rect, circle, ellipse, line, text, path, polygon, and polyline.
+    - Each function returns an SVG snippet string with provided attributes, enabling easy SVG composition.
+
+Advanced SVG shapes:
+    - Custom shape functions like cross, star, and heart that generate SVG <use> elements referencing predefined SVG groups.
+    - An arrow function that creates an SVG arrow by combining a line and a polygon arrowhead.
+    - A conic function that generates an SVG <ellipse> from a 3x3 symmetric conic matrix if the conic represents an ellipse. It calculates ellipse parameters (center, radii, rotation) and returns the SVG string with appropriate attributes.
+
+This module allows building SVG graphics by calling intuitive Python functions instead of manually writing SVG XML. The resulting SVG snippets can be embedded in HTML or used in SVG workflows.
+
 -- WIP --
 Created by A. Aichert on Sat Aug 19th 2023
 
@@ -23,7 +36,9 @@ See also: CanvasWithOverlay in Jupyter.py
 Generic generation of functions to create basic svg snippets (rect, line...)
 """
 
-from .Composer import Composer
+import numpy as np
+
+from .Composer import Composer, image
 
 
 def attributes(args_attributes, **kwargs):
@@ -276,6 +291,7 @@ Composer.declare(cross, {'cross': """<g id="cross">
   <line x1="-5" y1="5" x2="5" y2="-5" stroke-width="2"/>
 </g>"""})
 
+
 def star(x=0, y=0, size=4, fill='', **kwargs):
     """
     Generate SVG code for a star.
@@ -292,6 +308,7 @@ Composer.declare(star, {'star': """<g id="star">
   <polygon points="0,-10 2.76,-3.5 9.51,-3.5 4.63,1.5 7.39,8 0,4.5 -7.39,8 -4.63,1.5 -9.51,-3.5 -2.76,-3.5" stroke-width="2"/>
 </g>"""})
 
+
 def heart(x=0, y=0, size=4, angle=0, fill='', **kwargs):
     """
     Generate SVG code for a heart.
@@ -307,6 +324,7 @@ def heart(x=0, y=0, size=4, angle=0, fill='', **kwargs):
 Composer.declare(heart, {'heart': """<g id="heart">
 <path d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/>
 </g>"""})
+
 
 def arrow(start_x, start_y, end_x, end_y, arrow_length=10, arrow_width=6, **kwargs):
     """
@@ -350,3 +368,65 @@ def arrow(start_x, start_y, end_x, end_y, arrow_length=10, arrow_width=6, **kwar
     svg_code = line_svg + polygon_svg
 
     return svg_code
+
+
+def conic(C: np.ndarray, **kwargs) -> str:
+    """
+    Generate an SVG <ellipse> element string representing an ellipse defined by a 3x3 symmetric conic matrix.
+    If C does not represent an ellipse, the function is not implemented yet and returns only a comment.
+    FIXME What it needs to do for other shapes: obtain bounding box from renderer and draw polyline.
+    FIXME Currently does not differentiate between outside and inside the ellipse.
+    
+    Parameters:
+    C : (3, 3) ndarray
+        Symmetric matrix defining the conic section in homogeneous coordinates,
+        satisfying x.T @ C @ x = 0 with x = [x, y, 1].T.
+    
+    kwargs : dict
+        Additional SVG attributes for styling (e.g., stroke, fill, stroke_width).
+        Only keys from `default_attributes`, `stroke_attributes`, and `fill_attributes`
+        are accepted, except 'transform' which is computed automatically.
+    
+    Returns:
+    str
+        SVG <ellipse> element string with computed center (cx, cy), radii (rx, ry),
+        rotation (transform), and any additional valid attributes from kwargs.
+    """
+    A = C[:2, :2]
+    d = C[:2, 2]
+    f = C[2, 2]
+
+    # Center of ellipse
+    center = -np.linalg.inv(A) @ d
+
+    # Evaluate F
+    F = float(center.T @ A @ center + 2 * d.T @ center + f)
+    if F >= 0:
+        return "<-- ValueError: conic not an ellipse -->"
+
+    # Eigen decomposition of A / -F
+    eigvals, eigvecs = np.linalg.eigh(A / -F)
+    rx, ry = 1 / np.sqrt(eigvals)
+
+    # Rotation angle (deg) from first eigenvector
+    angle = np.degrees(np.arctan2(eigvecs[1, 0], eigvecs[0, 0]))
+
+    # Compose attributes
+    attrs = {
+        "cx": f"{center[0]:.2f}",
+        "cy": f"{center[1]:.2f}",
+        "rx": f"{rx:.2f}",
+        "ry": f"{ry:.2f}",
+        "transform": f"rotate({angle:.4f} {center[0]:.2f} {center[1]:.2f})"
+    }
+
+    # Add valid kwargs attributes (convert _ to -)
+    for k, v in kwargs.items():
+        if k in set(default_attributes) | set(stroke_attributes) | set(fill_attributes):
+            attrs[k.replace("_", "-")] = str(v)
+
+    # Build attribute string
+    attr_str = " ".join(f'{k}="{v}"' for k, v in attrs.items())
+
+    return f"<ellipse {attr_str} />"
+

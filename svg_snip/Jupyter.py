@@ -51,7 +51,7 @@ import ipywidgets as widgets
 from ipywidgets import Output, HTML
 
 from ipycanvas import MultiCanvas, hold_canvas
-
+from collections.abc import Callable
 
 @dataclass
 class MouseState:
@@ -71,7 +71,31 @@ class CanvasWithOverlay():
     """ A Canvas for iPythonWidgets with two layers (background and an overlay
     as pixel graphics) with and additional optional SVG overlay.
     """
-    def __init__(self, width, height, handle_draw=None, background="#D0D0D0FF"):
+    def __init__(
+        self, width: int, height: int, background: str = "#D0D0D0FF",
+        handle_draw: Callable[["CanvasWithOverlay"], None] | None = None,
+    ) -> None:
+        """
+        Initialize the CanvasWithOverlay widget.
+    
+        Parameters:
+            width (int): Width of the canvas in pixels.
+            height (int): Height of the canvas in pixels.
+            background (str): Background color in CSS format (default "#D0D0D0FF").
+            handle_draw (Callable[[CanvasWithOverlay], None], optional): 
+                A callback function that handles custom drawing logic.
+                It receives the CanvasWithOverlay instance as an argument.
+    
+        Usage example:
+            >>> vis = CanvasWithOverlay(200, 200)
+            >>> def draw(vis):
+            ...     x, y = vis.mouse_state.pos()
+            ...     vis.canvas[1].clear()
+            ...     vis.canvas[1].fill_style = "red" if vis.mouse_state.clicked else "blue"
+            ...     vis.canvas[1].fill_rect(x-2, y-2, 5, 5)
+            >>> vis.handle_draw = draw
+            >>> vis.display()
+        """
         self.w, self.h = width, height
         self.mouse_state = MouseState()
         
@@ -95,7 +119,7 @@ class CanvasWithOverlay():
 
         # Create an HTML widget with the provided SVG content and 'overlay' class
         svg_content = '''
-<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+<svg width="''' + str(width) + '''" height="''' + str(height) + '''" xmlns="http://www.w3.org/2000/svg">
   <!-- add vector graphics here, see also Python class svg_snip.Composer-->
 </svg>
 '''
