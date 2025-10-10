@@ -6,20 +6,26 @@ With an optional install of ipywidgets and ipycanvas, also as an interactive vis
 
 ## Installation
 
-### Using pip
-You can install `svg_snip` using pip:
+### Using pip (recommended)
+You can install `svg_snip` from PyPI using pip:
 
 ```bash
 pip install svg_snip
 ```
 
+### From source
+You can also install directly from the GitHub repository:
 
-### Using `setup.py`
+```bash
+pip install git+https://github.com/aaichert/svg_snip.git
+```
 
-```sh
+Or clone and install locally:
+
+```bash
 git clone https://github.com/aaichert/svg_snip
 cd svg_snip
-python setup.py install
+pip install -e .
 ```
 
 ## Basic Usage

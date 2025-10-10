@@ -1,0 +1,11 @@
+include README.md
+include LICENSE
+include pyproject.toml
+include setup.py
+recursive-include svg_snip *.py
+global-exclude *.pyc
+global-exclude __pycache__
+global-exclude .ipynb_checkpoints
+global-exclude *.so
+global-exclude *.dylib
+global-exclude *.egg-info
