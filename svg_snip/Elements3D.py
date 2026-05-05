@@ -209,7 +209,7 @@ def cube(P, min, max, fill="#00ff4080", **kwargs):
     svg_elements = ["<g>"]
     for face in faces:
         face_points = [corners[i] for i in face]  # homogeneous 4D points
-        svg_elements.append("  " + polygon_with_lighting(P, face_points, fill=fille, **kwargs))
+        svg_elements.append("  " + polygon_with_lighting(P, face_points, fill=fill, **kwargs))
     svg_elements.append("</g>")
     return "\n".join(svg_elements)
 
