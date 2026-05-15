@@ -326,7 +326,10 @@ Composer.declare(heart, {'heart': """<g id="heart">
 </g>"""})
 
 
-def arrow(start_x, start_y, end_x, end_y, arrow_length=10, arrow_width=6, **kwargs):
+def arrow(x1, y1, x2, y2,
+          arrow_length=10, arrow_width=6,
+          text=None, text_offset=0,
+          **kwargs):
     """
     Generate SVG code for an arrow. TODO use marker instead.
 
@@ -344,30 +347,34 @@ def arrow(start_x, start_y, end_x, end_y, arrow_length=10, arrow_width=6, **kwar
     Returns:
     str: SVG code for the arrow.
     """
-    # Generate SVG code for the line
-    line_svg = line(x1=start_x, y1=start_y, x2=end_x, y2=end_y, **kwargs)
 
-    # Calculate arrowhead points
-    dx = end_x - start_x
-    dy = end_y - start_y
-    length = (dx**2 + dy**2)**0.5
-    dx /= length
-    dy /= length
+    dx, dy = x2 - x1, y2 - y1
+    l = (dx**2 + dy**2)**0.5
+    dx, dy = dx / l, dy / l
 
-    # Calculate arrowhead points
-    arrowhead_x1 = end_x - arrow_length * dx - arrow_width * dy
-    arrowhead_y1 = end_y - arrow_length * dy + arrow_width * dx
-    arrowhead_x2 = end_x - arrow_length * dx + arrow_width * dy
-    arrowhead_y2 = end_y - arrow_length * dy - arrow_width * dx
+    ax1 = x2 - arrow_length * dx - arrow_width * dy
+    ay1 = y2 - arrow_length * dy + arrow_width * dx
+    ax2 = x2 - arrow_length * dx + arrow_width * dy
+    ay2 = y2 - arrow_length * dy - arrow_width * dx
 
-    # Generate SVG code for the polygon (arrowhead)
-    polygon_svg = polygon(points=f"{end_x:.2f},{end_y:.2f} {arrowhead_x1:.2f},{arrowhead_y1:.2f} {arrowhead_x2:.2f},{arrowhead_y2:.2f}",
-                               **kwargs)
+    svg = line(x1=x1, y1=y1, x2=x2, y2=y2, **kwargs)
 
-    # Combine both SVG codes
-    svg_code = line_svg + polygon_svg
+    svg += polygon(
+        points=f"{x2:.2f},{y2:.2f} {ax1:.2f},{ay1:.2f} {ax2:.2f},{ay2:.2f}",
+        **kwargs
+    )
 
-    return svg_code
+    if text is not None:
+        svg += text2D(
+            x=(x1 + x2) / 2 - text_offset * dy,
+            y=(y1 + y2) / 2 + text_offset * dx,
+            content=text,
+            text_anchor="middle",
+            dominant_baseline="middle",
+            fill=kwargs.get("stroke", "black")
+        )
+
+    return svg
 
 
 def conic(C: np.ndarray, **kwargs) -> str:
