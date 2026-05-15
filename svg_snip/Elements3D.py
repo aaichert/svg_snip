@@ -49,6 +49,7 @@ import numpy as np
 from .Composer import Composer
 from .Elements import line as line2D
 from .Elements import text as text2D
+from .Elements import arrow as arrow2D
 from .Elements import circle
 
 """
@@ -102,6 +103,20 @@ def line(P, X1, X2, stroke="green", **kwargs):
                   x2=x2[0][0]/x2[2][0], y2=x2[1][0]/x2[2][0],
                   stroke=stroke, **kwargs)
 
+
+def arrow(P, X1, X2, stroke="green", text=None, **kwargs):
+    x1 = P @ cvec(X1)
+    x2 = P @ cvec(X2)
+
+    return arrow2D(
+        x1=x1[0][0] / x1[2][0],
+        y1=x1[1][0] / x1[2][0],
+        x2=x2[0][0] / x2[2][0],
+        y2=x2[1][0] / x2[2][0],
+        stroke=stroke,
+        text=text,
+        **kwargs
+    )
 
 def wire_polygon(P, Xs, fill="none", stroke="black", **kwargs):
     xs = [dehomogenize(P@cvec(X)) for X in Xs]
