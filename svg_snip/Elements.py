@@ -345,7 +345,7 @@ def arrow(start_x, start_y, end_x, end_y, arrow_length=10, arrow_width=6, **kwar
     str: SVG code for the arrow.
     """
     # Generate SVG code for the line
-    line_svg = line(start_x=start_x, start_y=start_y, end_x=end_x, end_y=end_y, **kwargs)
+    line_svg = line(x1=start_x, y1=start_y, x2=end_x, y2=end_y, **kwargs)
 
     # Calculate arrowhead points
     dx = end_x - start_x
