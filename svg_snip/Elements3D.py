@@ -135,6 +135,7 @@ def arrow(P, X1, X2, stroke="green", text=None, **kwargs):
         **kwargs
     )
 
+
 def wire_polygon(P, Xs, fill="none", stroke="black", **kwargs):
     xs = [dehomogenize(P@cvec(X)) for X in Xs]
     xs = ' '.join([f'{round(x[0][0],2)},{round(x[1][0],2)}' for x in xs])

@@ -326,7 +326,7 @@ Composer.declare(heart, {'heart': """<g id="heart">
 </g>"""})
 
 
-def arrow(x1, y1, x2, y2, stroke='black', head='sharp', tail=None, **kwargs):
+def arrow(x1, y1, x2, y2, stroke='black', head='arrow-small', tail=None, **kwargs):
     """
     Generate SVG code for an arrow.
 
@@ -335,8 +335,8 @@ def arrow(x1, y1, x2, y2, stroke='black', head='sharp', tail=None, **kwargs):
     - y1 (float): The y-coordinate of the arrow's starting point.
     - x2 (float): The x-coordinate of the arrow's end point.
     - y2 (float): The y-coordinate of the arrow's end point.
-    - head (str): Shape of the end marker ('sharp', 'barb', 'circle', 'star', 'cross', or None).
-    - tail (str): Shape of the start marker ('sharp', 'barb', 'circle', 'star', 'cross', or None).
+    - head (str): Shape of the end marker ('arrow-small', 'arrow-large', 'circle', 'star', or None).
+    - tail (str): Shape of the start marker ('arrow-small', 'arrow-large', 'circle', 'star', or None).
 
     kwargs:
      - stroke, stroke_width, and others, see also: line
@@ -358,16 +358,16 @@ def arrow(x1, y1, x2, y2, stroke='black', head='sharp', tail=None, **kwargs):
 
     return line(**line_args)
 
-# Declare all 5 marker styles specifically for the arrow function
+# Declare active marker styles specifically for the arrow function
 Composer.declare(arrow, {
-    # Sharp triangular arrowhead
-    'sharp': """<marker id="sharp" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto-start-reverse">
-  <polygon points="0,0 6,3 0,6" fill="context-stroke"/>
+    # Barbed/Stealth arrowhead (smaller)
+    'arrow-small': """<marker id="arrow-small" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto-start-reverse">
+  <polygon points="0,0 6,3 0,6 1.5,3" fill="context-stroke"/>
 </marker>""",
 
-    # Barbed/Stealth arrowhead
-    'barb': """<marker id="barb" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto-start-reverse">
-  <polygon points="0,0 6,3 0,6 1.5,3" fill="context-stroke"/>
+    # Barbed/Stealth arrowhead (larger)
+    'arrow-large': """<marker id="arrow-large" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto-start-reverse">
+  <polygon points="0,0 12,6 0,12 3,6" fill="context-stroke"/>
 </marker>""",
 
     # Circle terminal
@@ -375,7 +375,7 @@ Composer.declare(arrow, {
   <circle cx="3" cy="3" r="2.5" fill="context-stroke"/>
 </marker>""",
 
-    # Star marker (re-scaled and centered for a 20x20 marker box)
+    # Star marker
     'star': """<marker id="star" markerWidth="10" markerHeight="10" refX="10" refY="10" orient="auto-start-reverse" viewBox="-10 -10 20 20">
   <polygon points="0,-10 2.76,-3.5 9.51,-3.5 4.63,1.5 7.39,8 0,4.5 -7.39,8 -4.63,1.5 -9.51,-3.5 -2.76,-3.5" fill="context-stroke"/>
 </marker>"""
