@@ -37,10 +37,7 @@ See also: CanvasWithOverlay in Jupyter.py
 import io
 import html
 import base64
-import typing
-from typing import Optional, Callable
 
-ShapeFunc = Callable[..., str]
 
 
 def _try_import_pil_image():
@@ -119,7 +116,7 @@ class Group:
         print(group())
     """
 
-    declared_shapes: dict[str, dict[str, str]] = {}
+    declared_shapes = {}
 
     VALID_GROUP_ATTRIBUTES = {
         "id", "class", "style", "display", "tabindex", "transform",
@@ -129,18 +126,16 @@ class Group:
         "onclick", "onmouseover", "onmouseout", "onmousedown", "onmouseup", "onmouseenter", "onmouseleave"
     }
 
-    def __init__(self, 
-                 children: list[tuple[ShapeFunc, dict]] | None = None, 
-                 **kwargs: str) -> None:
-        self.children: list[tuple[ShapeFunc, dict]] = children if children is not None else []
+    def __init__(self, children=None, **kwargs):
+        self.children = children if children is not None else []
         # Filter only valid group attributes from kwargs
         self.kwargs = {k: v for k, v in kwargs.items() if k in self.VALID_GROUP_ATTRIBUTES}
 
-    def add(self, func: ShapeFunc, **kwargs) -> tuple[ShapeFunc, dict]:
+    def add(self, func, **kwargs):
         self.children.append((func, kwargs))
         return self.children[-1]
 
-    def __call__(self, *, composer: Optional["Composer"] = None, **call_kwargs) -> str:
+    def __call__(self, *, composer=None, **call_kwargs):
         # Merge stored kwargs with call_kwargs; call_kwargs override
         merged_attribs = {**self.kwargs, **{k: v for k, v in call_kwargs.items() if k in self.VALID_GROUP_ATTRIBUTES}}
         attribs_str = ' '.join(f'{k}="{v}"' for k, v in merged_attribs.items())
@@ -156,7 +151,7 @@ class Group:
         return f'<g {attribs_str}>\n{indent(childrens_svg_code)}' + '\n</g>'
 
     @classmethod
-    def declare(cls, func: ShapeFunc, definitions: dict[str, str]) -> None:
+    def declare(cls, func, definitions):
         cls.declared_shapes[func.__name__] = definitions
 
 
@@ -197,7 +192,7 @@ class Composer(Group):
         svg.display()
     """
 
-    def __init__(self, canvas: None | tuple[int, int] | "PIL.Image.Image" = None, sparse: int | None = None) -> None:
+    def __init__(self, canvas=None, sparse=None):
         super().__init__()
         pil_image_type = _try_import_pil_image()
         if pil_image_type is not None and isinstance(canvas, pil_image_type):
@@ -209,9 +204,9 @@ class Composer(Group):
         else:
             self.image_size = (100, 100)
         self.scale = 1
-        self.widget: "HTML" | None = None
+        self.widget = None
 
-    def render(self, debug: bool = False, nested: bool = False, extra_defs: dict[str, str] | None = None, extra_attrib: str = '', **override_kwargs) -> str | tuple[str, dict[str, str]]:
+    def render(self, debug=False, nested=False, extra_defs=None, extra_attrib='', **override_kwargs):
         """
         Render the SVG content as a complete SVG markup string.
         

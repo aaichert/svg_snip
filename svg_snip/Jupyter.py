@@ -71,10 +71,7 @@ class CanvasWithOverlay():
     """ A Canvas for iPythonWidgets with two layers (background and an overlay
     as pixel graphics) with and additional optional SVG overlay.
     """
-    def __init__(
-        self, width: int, height: int, background: str = "#D0D0D0FF",
-        handle_draw: Callable[["CanvasWithOverlay"], None] | None = None,
-    ) -> None:
+    def __init__(self, width, height, background="#D0D0D0FF", handle_draw=None):
         """
         Initialize the CanvasWithOverlay widget.
     
