@@ -47,3 +47,4 @@ packages = ["svg_snip"]
 
 [tool.setuptools_scm]
 write_to = "svg_snip/_version.py"
+fallback_version = "0.0.1-local"  # <-- Safe fallback for local un-tagged or shallow clones

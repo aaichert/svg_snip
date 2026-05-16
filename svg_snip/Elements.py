@@ -326,55 +326,60 @@ Composer.declare(heart, {'heart': """<g id="heart">
 </g>"""})
 
 
-def arrow(x1, y1, x2, y2,
-          arrow_length=10, arrow_width=6,
-          text=None, text_offset=0,
-          **kwargs):
+def arrow(x1, y1, x2, y2, stroke='black', head='sharp', tail=None, **kwargs):
     """
-    Generate SVG code for an arrow. TODO use marker instead.
+    Generate SVG code for an arrow.
 
     Parameters:
-    - start_x (float): The x-coordinate of the arrow's starting point.
-    - start_y (float): The y-coordinate of the arrow's starting point.
-    - end_x (float): The x-coordinate of the arrow's end point.
-    - end_y (float): The y-coordinate of the arrow's end point.
-    - arrow_length (float): The length of the arrowhead.
-    - arrow_width (float): The width of the arrowhead.
+    - x1 (float): The x-coordinate of the arrow's starting point.
+    - y1 (float): The y-coordinate of the arrow's starting point.
+    - x2 (float): The x-coordinate of the arrow's end point.
+    - y2 (float): The y-coordinate of the arrow's end point.
+    - head (str): Shape of the end marker ('sharp', 'barb', 'circle', 'star', 'cross', or None).
+    - tail (str): Shape of the start marker ('sharp', 'barb', 'circle', 'star', 'cross', or None).
 
     kwargs:
-     - stroke, stroke_width, and others, see also: line, polygon
+     - stroke, stroke_width, and others, see also: line
 
     Returns:
     str: SVG code for the arrow.
     """
-
-    dx, dy = x2 - x1, y2 - y1
-    l = (dx**2 + dy**2)**0.5
-    dx, dy = dx / l, dy / l
-
-    ax1 = x2 - arrow_length * dx - arrow_width * dy
-    ay1 = y2 - arrow_length * dy + arrow_width * dx
-    ax2 = x2 - arrow_length * dx + arrow_width * dy
-    ay2 = y2 - arrow_length * dy - arrow_width * dx
-
-    svg = line(x1=x1, y1=y1, x2=x2, y2=y2, **kwargs)
-
-    svg += polygon(
-        points=f"{x2:.2f},{y2:.2f} {ax1:.2f},{ay1:.2f} {ax2:.2f},{ay2:.2f}",
+    line_args = {
+        "x1": x1, "y1": y1, "x2": x2, "y2": y2,
+        "stroke": stroke,
         **kwargs
-    )
+    }
 
-    if text is not None:
-        svg += text2D(
-            x=(x1 + x2) / 2 - text_offset * dy,
-            y=(y1 + y2) / 2 + text_offset * dx,
-            content=text,
-            text_anchor="middle",
-            dominant_baseline="middle",
-            fill=kwargs.get("stroke", "black")
-        )
+    # Use snake_case keys so the attributes compiler picks them up
+    if head:
+        line_args["marker_end"] = f"url(#{head})"
+    if tail:
+        line_args["marker_start"] = f"url(#{tail})"
 
-    return svg
+    return line(**line_args)
+
+# Declare all 5 marker styles specifically for the arrow function
+Composer.declare(arrow, {
+    # Sharp triangular arrowhead
+    'sharp': """<marker id="sharp" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto-start-reverse">
+  <polygon points="0,0 6,3 0,6" fill="context-stroke"/>
+</marker>""",
+
+    # Barbed/Stealth arrowhead
+    'barb': """<marker id="barb" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto-start-reverse">
+  <polygon points="0,0 6,3 0,6 1.5,3" fill="context-stroke"/>
+</marker>""",
+
+    # Circle terminal
+    'circle': """<marker id="circle" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto-start-reverse">
+  <circle cx="3" cy="3" r="2.5" fill="context-stroke"/>
+</marker>""",
+
+    # Star marker (re-scaled and centered for a 20x20 marker box)
+    'star': """<marker id="star" markerWidth="10" markerHeight="10" refX="10" refY="10" orient="auto-start-reverse" viewBox="-10 -10 20 20">
+  <polygon points="0,-10 2.76,-3.5 9.51,-3.5 4.63,1.5 7.39,8 0,4.5 -7.39,8 -4.63,1.5 -9.51,-3.5 -2.76,-3.5" fill="context-stroke"/>
+</marker>"""
+})
 
 
 def conic(C: np.ndarray, **kwargs) -> str:

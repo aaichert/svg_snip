@@ -105,6 +105,23 @@ def line(P, X1, X2, stroke="green", **kwargs):
 
 
 def arrow(P, X1, X2, stroke="green", text=None, **kwargs):
+    """
+    Generate SVG code for a 3D arrow projected onto a 2D plane.
+
+    Parameters:
+    - P (numpy 3x4 matrix): Projection matrix.
+    - X1 (array-like): The 3D coordinates of the arrow's starting point.
+    - X2 (array-like): The 3D coordinates of the arrow's end point.
+    - stroke (str): The color of the arrow line and markers.
+    - text (str): Optional text label to display along the arrow.
+
+    kwargs:
+     - head (str): Shape of the end marker ('sharp', 'barb', 'circle', 'star', 'cross', or None).
+     - tail (str): Shape of the start marker ('sharp', 'barb', 'circle', 'star', 'cross', or None).
+
+    Returns:
+    str: SVG code for the projected arrow.
+    """
     x1 = P @ cvec(X1)
     x2 = P @ cvec(X2)
 
