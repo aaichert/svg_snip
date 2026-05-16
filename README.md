@@ -20,6 +20,20 @@ You can also install directly from the GitHub repository:
 pip install git+https://github.com/aaichert/svg_snip.git
 ```
 
+### Optional extras
+The core package only requires `numpy` and supports SVG generation without Jupyter or Pillow.
+
+- `Pillow` is optional and enables embedding PIL images into SVG with `svg_snip.Composer.image()`.
+- `IPython`, `ipywidgets`, and `ipycanvas` are optional and enable Jupyter display helpers.
+
+Install optional extras as needed:
+
+```bash
+pip install svg_snip[pillow]
+pip install svg_snip[jupyter]
+pip install svg_snip[full]
+```
+
 Or clone and install locally:
 
 ```bash

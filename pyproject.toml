@@ -30,9 +30,12 @@ classifiers = [
 ]
 dependencies = [
     "numpy",
-    "IPython",
-    "Pillow",
 ]
+
+[project.optional-dependencies]
+pillow = ["Pillow"]
+jupyter = ["IPython", "ipywidgets", "ipycanvas"]
+full = ["Pillow", "IPython", "ipywidgets", "ipycanvas"]
 
 [project.urls]
 Homepage = "https://github.com/aaichert/svg_snip"

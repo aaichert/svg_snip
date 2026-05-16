@@ -37,12 +37,30 @@ See also: CanvasWithOverlay in Jupyter.py
 import io
 import html
 import base64
+import typing
 from typing import Optional, Callable
-from IPython.display import display, HTML
-
-from PIL import Image
 
 ShapeFunc = Callable[..., str]
+
+
+def _try_import_pil_image():
+    try:
+        from PIL.Image import Image as PILImage
+    except ImportError:
+        return None
+    return PILImage
+
+
+def _try_import_ipython_display():
+    try:
+        from IPython.display import display, HTML
+    except ImportError as exc:
+        raise RuntimeError(
+            "IPython is required for Composer.display(). "
+            "Install optional extras with `pip install svg_snip[Jupyter]`."
+        ) from exc
+    return display, HTML
+
 
 
 def indent(text: str, n: int = 2) -> str:
@@ -60,11 +78,13 @@ def image(data, x=0, y=0, width=None, height=None, sparse=0, **kwargs) -> str:
         width, height: (optional) size
         sparse: number of colors for PNG compression if >0
     """
-    if isinstance(data, Image.Image):
+    pil_image_type = _try_import_pil_image()
+    if pil_image_type is not None and isinstance(data, pil_image_type):
         buffered = io.BytesIO()
         if sparse is not None and sparse > 0:
             if sparse > 1:
-                data = data.convert("P", palette=Image.ADAPTIVE, colors=sparse)
+                from PIL import Image as PILImageModule
+                data = data.convert("P", palette=PILImageModule.ADAPTIVE, colors=sparse)
             data.save(buffered, format="PNG", optimize=True)
         else:
             data.save(buffered, format="JPEG")
@@ -177,9 +197,10 @@ class Composer(Group):
         svg.display()
     """
 
-    def __init__(self, canvas: None | tuple[int, int] | Image.Image = None, sparse: int | None = None) -> None:
+    def __init__(self, canvas: None | tuple[int, int] | "PIL.Image.Image" = None, sparse: int | None = None) -> None:
         super().__init__()
-        if isinstance(canvas, Image.Image):
+        pil_image_type = _try_import_pil_image()
+        if pil_image_type is not None and isinstance(canvas, pil_image_type):
             self.image_size = (canvas.width, canvas.height)
             # Add the background image shape automatically
             self.add(image, data=canvas, sparse=sparse)
@@ -188,7 +209,7 @@ class Composer(Group):
         else:
             self.image_size = (100, 100)
         self.scale = 1
-        self.widget: HTML | None = None
+        self.widget: "HTML" | None = None
 
     def render(self, debug: bool = False, nested: bool = False, extra_defs: dict[str, str] | None = None, extra_attrib: str = '', **override_kwargs) -> str | tuple[str, dict[str, str]]:
         """
@@ -270,5 +291,6 @@ class Composer(Group):
         Raises:
             RuntimeError: If display is called in a non-Jupyter environment.
         """
+        display_fn, HTML = _try_import_ipython_display()
         self.widget = HTML(self.render(debug=debug, **override_kwargs))
-        display(self.widget)
+        display_fn(self.widget)
