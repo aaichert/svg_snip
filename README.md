@@ -76,7 +76,7 @@ svg.display(debug=True)
 
 produces:
 
-![example.png](example.png)
+![example.png](https://raw.githubusercontent.com/aaichert/svg_snip/main/example.png)
 
 This example also demonstrates, that the library is able to correctly collect `<defs>` for later reference.
 
@@ -150,7 +150,7 @@ display(s, out)
 update({"new": s.value})
 ```
 
-![example.png](example_x.png)
+![example.png](https://raw.githubusercontent.com/aaichert/svg_snip/main/example_x.png)
 
 
 ## Recommended Additional Packages
@@ -158,14 +158,14 @@ update({"new": s.value})
 The package [ProjectiveGeometry23](https://pypi.org/project/ProjectiveGeometry23/) can be used for simple 3D graphics.
 
 
-Please see [example_3D_cube.ipynb](example_3D_cube.ipynb) for more information on how to make advanced use of this library. You can rotate this cube interactively when you run the Jupyter notebook.
+Please see [example_3D_cube.ipynb](https://raw.githubusercontent.com/aaichert/svg_snip/main/example_3D_cube.ipynb) for more information on how to make advanced use of this library. You can rotate this cube interactively when you run the Jupyter notebook.
 
-![example_3D_cube.svg](example_3D_cube.svg)
+![example_3D_cube.svg](https://raw.githubusercontent.com/aaichert/svg_snip/main/example_3D_cube.svg)
 
 
 Here is an example on how to use the library for vector-overlays on existing raster images, e.g. for scientific publication.
 
-![example_overlay.svg](example_overlay.svg)
+![example_overlay.svg](https://raw.githubusercontent.com/aaichert/svg_snip/main/example_overlay.svg)
 
 
 The package [html_snippets](https://github.com/aaichert/html_snippets) is in an earlier development stage. However, it supports generating animations based on SVG frames for use in HTML documents.
@@ -205,7 +205,7 @@ with open('example_animation.html', 'w') as file:
     
 ```
 
-[example_animation.html](example_animation.html)
+[example_animation.html](https://raw.githubusercontent.com/aaichert/svg_snip/main/example_animation.html)
 
 
 
