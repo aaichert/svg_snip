@@ -46,7 +46,7 @@ vis.display()
 
 import numpy as np
 
-from .Composer import Composer
+from .Composer import Composer, Group
 from .Elements import line as line2D
 from .Elements import text as text2D
 from .Elements import arrow as arrow2D
@@ -195,16 +195,17 @@ def wire_cube(P, min, max, stroke="blue", **kwargs):
         np.array([min[0],max[1],max[2],1]).reshape(-1, 1),
         np.array([max[0],max[1],max[2],1]).reshape(-1, 1)
     ]
-    el = ['<g>']
+    svg = Group("Wireframe Cube")
+
     for a in range(8):
         for b in range(8):
             m1 = a%2 != b%2
             m2 = (a//2)%2 != (b//2)%2
             m3 = (a//4)%2 != (b//4)%2
             if (m1+m2+m3) == 1:
-                el = el + [line(P, v[a], v[b], stroke=stroke, **kwargs)]
+                svg.add(line, P=P, X1=v[a], X2=v[b], stroke=stroke, **kwargs)
     
-    return '\n  '.join(el) + '\n</g>\n'
+    return svg
 
 
 def cube(P, min, max, fill="#00ff4080", **kwargs):
@@ -238,15 +239,15 @@ def cube(P, min, max, fill="#00ff4080", **kwargs):
         [7, 5, 3, 6],  # right
         [7, 4, 1, 5],  # top
     ]
+
+    svg = Group("Shaded Cube")
     
-    svg_elements = ["<g>"]
     for face in faces:
         face_points = [corners[i] for i in face]  # homogeneous 4D points
-        svg_elements.append("  " + polygon_with_lighting(P, face_points, fill=fill, **kwargs))
-    svg_elements.append("</g>")
-    return "\n".join(svg_elements)
+        svg.add(polygon_with_lighting, P=P, Xs=face_points, fill=fill, **kwargs)
+    return svg
 
-    
+
 def sphere(P, center=(0,0,0,1), radius=50.0, subdivisions=True, fill="#00ff4080", **kwargs):
     """Render a geodesic sphere as SVG polygons with optional lighting."""
     center = dehomogenize(center).flatten()
@@ -274,12 +275,12 @@ def sphere(P, center=(0,0,0,1), radius=50.0, subdivisions=True, fill="#00ff4080"
         faces=new_faces
     # scale and translate vertices
     verts=[np.append(np.array(v)*radius+np.array(center),1.0) for v in verts]
+
     # render SVG
-    svg=["<g>"]
+    svg = Group("Geodesic Sphere")
     for f in faces:
-        svg.append("  "+polygon_with_lighting(P,[verts[i] for i in f], fill=fill, **kwargs))
-    svg.append("</g>")
-    return "\n".join(svg)
+        svg.add(polygon_with_lighting, P=P, Xs=[verts[i] for i in f], fill=fill, **kwargs)
+    return svg
 
 
 def volume(P, shape, model_matrix=np.eye(4), color_axes=True, lighting=True, **kwargs):
@@ -323,12 +324,12 @@ def volume(P, shape, model_matrix=np.eye(4), color_axes=True, lighting=True, **k
     ]
 
     # Render faces with lighting
-    svg = ["<g>"]
+    svg = Group("Volume")
     for f in faces:
         if lighting:
-            svg.append("  " + polygon_with_lighting(P, [corners[i] for i in f], **kwargs))
+            svg.add(polygon_with_lighting, P=P, Xs=[corners[i] for i in f], **kwargs)
         else:
-            svg.append("  " + polygon(P, [corners[i] for i in f], **kwargs))
+            svg.add(polygon, P=P, Xs=[corners[i] for i in f], **kwargs)
 
     # Optional colored axes from origin
     if color_axes:
@@ -338,7 +339,6 @@ def volume(P, shape, model_matrix=np.eye(4), color_axes=True, lighting=True, **k
         for end, color in zip(axes_ends, colors):
             line_kwargs = kwargs.copy()
             line_kwargs.pop("stroke", None)  # remove stroke from kwargs if present
-            svg.append(line(P, origin, end, stroke=color, **line_kwargs))
+            svg.add(arrow, P=P, X1=origin, X2=end, stroke=color, **line_kwargs)
 
-    svg.append("</g>")
-    return "\n".join(svg)
+    return svg

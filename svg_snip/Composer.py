@@ -38,7 +38,6 @@ import html
 import base64
 
 
-
 def _try_import_pil_image():
     try:
         from PIL.Image import Image as PILImage
@@ -108,7 +107,8 @@ def image(data, x=0, y=0, width=None, height=None, sparse=0, **kwargs) -> str:
 
 class Group:
     """
-    Container for SVG elements grouped inside a <g> element with proper indentation.
+    Container for SVG elements grouped inside a <g> element with proper indentation. ShapeFunc refers to a
+    callable which produces svg code. The Group's children Tupels are such functions and their kwargs.
 
     Attributes:
         children (list[tuple[ShapeFunc, dict]]): List of shape functions and their parameters.
@@ -130,12 +130,15 @@ class Group:
     VALID_GROUP_ATTRIBUTES = {
         "id", "class", "style", "display", "tabindex", "transform",
         "pointer-events", "visibility", "opacity", "filter", "mask", "clip-path", "cursor",
-        "fill", "fill-opacity", "stroke", "stroke-width", "stroke-opacity",
         "font-family", "font-size", "font-weight"
     }
 
-    def __init__(self, children=None, **kwargs):
-        self.children = children if children is not None else []
+    def __init__(self, comment_str : str | None = None, children=[], **kwargs):
+        self.children = []
+        if comment_str is not None:
+            self.add(comment, text=comment_str)
+        self.children += children
+
         self.kwargs = {k: v for k, v in kwargs.items() if k in self.VALID_GROUP_ATTRIBUTES}
 
     def add(self, func, **kwargs):
@@ -143,31 +146,52 @@ class Group:
         return self.children[-1]
 
     def __call__(self, *, composer=None, **call_kwargs):
-        group_attribs = {k: v for k, v in call_kwargs.items() if k in self.VALID_GROUP_ATTRIBUTES}
-        merged_attribs = {**self.kwargs, **group_attribs}
-        attribs_str = ' '.join(f'{k}="{v}"' for k, v in merged_attribs.items())
+        i_am_not_composer = not isinstance(self, Composer)
+        group_attribs = {k: v for k, v in call_kwargs.items()
+                         if k in self.VALID_GROUP_ATTRIBUTES and i_am_not_composer}
+        other_kwargs = call_kwargs.copy()  # all kwargs for children
+#        other_kwargs = {k: v for k, v in call_kwargs.items()
+#                        if not k in self.VALID_GROUP_ATTRIBUTES and i_am_not_composer}
+        group_attribs = ' '.join(f'{k}="{v}"' for k, v in group_attribs.items())
+        group_attribs = ' ' + group_attribs if group_attribs else ''
 
         content = []
-        local_recorded_functions = set()
+        used_functions = set()
 
         for func, child_kwargs in self.children:
-            local_recorded_functions.add(func)
-
-            if isinstance(func, Group):
-                # Nested group returns its own code string and its own inner functions
-                child_svg, child_funcs = func(composer=composer)
-                local_recorded_functions.update(child_funcs)
+            merged_kwargs = {**child_kwargs, **other_kwargs, 'composer': composer}
+            try:
+                child_result = func(**merged_kwargs)
+            except Exception:
+                formatted_args = ",\n".join(
+                    f"    {k}={v!r}" for k, v in merged_kwargs.items()
+                )
+                func_name = getattr(func, "__name__", str(type(func)) + '<' + str(func) + '>')
+                print(
+                    f"Error during evaluation of\n"
+                    f"  {func_name}(\n"
+                    f"{formatted_args}\n"
+                    f"  )"
+                )
+                raise
+            while isinstance(child_result, Group):
+                other_kwargs['composer'] = composer
+                child_result = child_result(**other_kwargs)
+            if isinstance(child_result, tuple):
+                child_svg, child_funcs = child_result
+                used_functions.update(child_funcs)
                 content.append(child_svg)
-            else:
-                merged_kwargs = {**child_kwargs, **call_kwargs}
-                if composer is not None:
-                    merged_kwargs['composer'] = composer
-                content.append(func(**merged_kwargs))
+            else:  # assume it's a string of svg code
+                used_functions.add(func)
+                content.append(child_result)
 
-        childrens_svg_code = "\n".join(content)
-        svg_code = f'<g {attribs_str}>\n{indent(childrens_svg_code)}' + '\n</g>'
+        content = "\n".join([line for line in content if line.strip()])
+        if i_am_not_composer:
+            svg_code = f'<g{group_attribs}>\n{indent(content)}' + '\n</g>'
+        else:
+            svg_code = indent(content)
+        return svg_code, used_functions
 
-        return svg_code, local_recorded_functions
 
     @classmethod
     def declare(cls, func, definitions):
@@ -255,41 +279,28 @@ class Composer(Group):
             print(svg.render(debug=True, extra_attrib='class="icon"'))
         """
         definitions = extra_defs if isinstance(extra_defs, dict) else {}
-        recorded_functions = set()
 
-        svg_parts = []
-        for func, kwargs in self.children:
-            recorded_functions.add(func)
+        override_kwargs['composer'] = self
+        child_svg, used_functions = self.__call__(**override_kwargs)
 
-            if isinstance(func, Group):
-                child_svg, child_funcs = func(composer=self, **override_kwargs)
-                recorded_functions.update(child_funcs)
-                svg_parts.append(child_svg)
-            else:
-                merged_kwargs = {**kwargs, **override_kwargs, 'composer': self}
-                svg_parts.append(func(**merged_kwargs))
+        for fn in used_functions:
+            defs = self.declared_shapes.get(fn)
+            if defs:
+                definitions.update(defs)
 
-        if extra_defs is not True:
-            for fn in recorded_functions:
-                defs = self.declared_shapes.get(fn)
-                if defs:
-                    definitions.update(defs)
-
-        defs_parts = []
-        if definitions and extra_defs is not True:
-            defs_parts.append('<defs>')
-            for defstr in definitions.values():
-                defs_parts.append(indent(defstr))
-            defs_parts.append('</defs>')
-
-        all_parts = defs_parts + svg_parts
+        if len(definitions) > 0:
+            definitions = (
+                '  <defs>\n'
+                + "\n".join([indent(d, 4) for d in definitions.values()])
+                +'\n  </defs>\n')
 
         s = getattr(self, 'scale', 1)
         w, h = self.image_size
         raw_html = (
             f'<svg {extra_attrib} width="{w*s}" height="{h*s}" '
             f'viewBox="0 0 {w} {h}" xmlns="http://www.w3.org/2000/svg">\n'
-            + '\n'.join(indent(part) for part in all_parts)
+            + (definitions or "")
+            + child_svg
             + '\n</svg>'
         )
 
