@@ -71,6 +71,12 @@ jobs:
         python -m pip install --upgrade pip
         pip install build
 
+    - name: Debug SCM
+      run: |
+        python -m setuptools_scm
+        git describe --tags
+        git tag --points-at HEAD
+
     - name: Build package
       run: python -m build
 

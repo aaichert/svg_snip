@@ -90,3 +90,10 @@ testpaths = ["tests"]
 [tool.ruff]
 line-length = 100
 target-version = "py38"
+
+[tool.setuptools.package-data]
+svg_snip = [
+    "*.png",
+    "*.svg",
+    "*.html",
+]
