@@ -82,8 +82,6 @@ local_scheme = "no-local-version"
 tag_regex = "^v?(?P<version>.*)$"
 fallback_version = "0.0.1"
 
-
-
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
