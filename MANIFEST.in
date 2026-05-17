@@ -2,9 +2,22 @@ include README.md
 include LICENSE
 include pyproject.toml
 recursive-include svg_snip *.py
-global-exclude *.pyc
+
+# Documentation and assets
+include example_x.png
+include example.png
+
+# Include example notebooks or docs
+recursive-include notebooks *.ipynb
+recursive-include docs *
+
+# Exclude build/cache artifacts
+global-exclude *.py[cod]
 global-exclude __pycache__
-global-exclude .ipynb_checkpoints
+global-exclude .DS_Store
 global-exclude *.so
 global-exclude *.dylib
 global-exclude *.egg-info
+global-exclude .ipynb_checkpoints
+
+
