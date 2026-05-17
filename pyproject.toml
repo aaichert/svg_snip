@@ -74,11 +74,15 @@ include-package-data = true
 [tool.setuptools.packages.find]
 include = ["svg_snip*"]
 
+
 [tool.setuptools_scm]
 write_to = "svg_snip/_version.py"
 version_scheme = "guess-next-dev"
 local_scheme = "no-local-version"
+tag_regex = "^v?(?P<version>.*)$"
 fallback_version = "0.0.1"
+
+
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
