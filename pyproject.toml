@@ -1,50 +1,88 @@
 [build-system]
-requires = ["setuptools>=45", "wheel", "setuptools-scm[toml]>=6.2"]
+requires = [
+    "setuptools>=69",
+    "wheel",
+    "setuptools-scm[toml]>=8",
+]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "svg_snip"
 dynamic = ["version"]
+
 description = "Generate simple SVG snippets for use in Jupyter."
 readme = "README.md"
-requires-python = ">=3.6"
-license = "Apache-2.0"
+requires-python = ">=3.8"
+
+license = { text = "Apache-2.0" }
 authors = [
-    {name = "Andre Aichert", email = "aaichert@gmail.com"},
+    { name = "Andre Aichert", email = "aaichert@gmail.com" },
 ]
-keywords = ["svg", "jupyter", "visualization", "graphics"]
+
+keywords = [
+    "svg",
+    "jupyter",
+    "visualization",
+    "graphics",
+]
+
 classifiers = [
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.6",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
-    "Operating System :: OS Independent",
-    "Development Status :: 4 - Beta",
-    "Intended Audience :: Developers",
-    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3.12",
     "Topic :: Multimedia :: Graphics",
     "Topic :: Scientific/Engineering :: Visualization",
 ]
+
 dependencies = [
-    "numpy",
+    "numpy>=1.21",
 ]
 
 [project.optional-dependencies]
-pillow = ["Pillow"]
-jupyter = ["IPython", "ipywidgets", "ipycanvas"]
-full = ["Pillow", "IPython", "ipywidgets", "ipycanvas"]
+pillow = [
+    "Pillow>=9",
+]
+
+jupyter = [
+    "IPython>=8",
+    "ipywidgets>=8",
+    "ipycanvas>=0.13",
+]
+
+full = [
+    "Pillow>=9",
+    "IPython>=8",
+    "ipywidgets>=8",
+    "ipycanvas>=0.13",
+]
 
 [project.urls]
 Homepage = "https://github.com/aaichert/svg_snip"
-"Bug Tracker" = "https://github.com/aaichert/svg_snip/issues"
-Repository = "https://github.com/aaichert/svg_snip.git"
+Repository = "https://github.com/aaichert/svg_snip"
+Issues = "https://github.com/aaichert/svg_snip/issues"
 
 [tool.setuptools]
-packages = ["svg_snip"]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["svg_snip*"]
 
 [tool.setuptools_scm]
 write_to = "svg_snip/_version.py"
-fallback_version = "0.0.1-local"  # <-- Safe fallback for local un-tagged or shallow clones
+version_scheme = "guess-next-dev"
+local_scheme = "no-local-version"
+fallback_version = "0.0.1"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py38"

@@ -146,14 +146,17 @@ class Group:
         return self.children[-1]
 
     def __call__(self, *, composer=None, **call_kwargs):
-        i_am_not_composer = not isinstance(self, Composer)
-        group_attribs = {k: v for k, v in call_kwargs.items()
-                         if k in self.VALID_GROUP_ATTRIBUTES and i_am_not_composer}
-        other_kwargs = call_kwargs.copy()  # all kwargs for children
-#        other_kwargs = {k: v for k, v in call_kwargs.items()
-#                        if not k in self.VALID_GROUP_ATTRIBUTES and i_am_not_composer}
-        group_attribs = ' '.join(f'{k}="{v}"' for k, v in group_attribs.items())
-        group_attribs = ' ' + group_attribs if group_attribs else ''
+        is_composer = isinstance(self, Composer)
+
+        group_dict = {} if is_composer else {
+            k: v for k, v in call_kwargs.items()
+            if k in self.VALID_GROUP_ATTRIBUTES
+        }
+        other_kwargs = {
+            k: v for k, v in call_kwargs.items()
+            if k not in group_dict
+        }
+        group_attribs = ''.join(f' {k}="{v}"' for k, v in group_dict.items())
 
         content = []
         used_functions = set()
@@ -186,10 +189,10 @@ class Group:
                 content.append(child_result)
 
         content = "\n".join([line for line in content if line.strip()])
-        if i_am_not_composer:
-            svg_code = f'<g{group_attribs}>\n{indent(content)}' + '\n</g>'
-        else:
+        if is_composer:
             svg_code = indent(content)
+        else:
+            svg_code = f'<g{group_attribs}>\n{indent(content)}' + '\n</g>'
         return svg_code, used_functions
 
 

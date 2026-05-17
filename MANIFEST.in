@@ -6,6 +6,9 @@ recursive-include svg_snip *.py
 # Documentation and assets
 include example_x.png
 include example.png
+include example_3D_cube.svg
+include example_overlay.svg
+include example_animation.html
 
 # Include example notebooks or docs
 recursive-include notebooks *.ipynb

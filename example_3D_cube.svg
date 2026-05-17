@@ -1,0 +1,8 @@
+<svg  width="500" height="500" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+  <g>
+    <!-- Shaded Cube -->
+    <polygon points="187.44,269.71 49.21,395.92 86.66,169.76 202.88,1.55" fill="rgb(0,120,255)" stroke="black" style="filter:brightness(72%)" />
+    <polygon points="187.44,269.71 474.98,360.52 286.69,443.44 49.21,395.92" fill="rgb(0,120,255)" stroke="black" style="filter:brightness(77%)" />
+    <polygon points="187.44,269.71 202.88,1.55 429.0,119.91 474.98,360.52" fill="rgb(0,120,255)" stroke="black" style="filter:brightness(85%)" />
+  </g>
+</svg>
